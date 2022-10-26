@@ -3,8 +3,6 @@ package com.bcopstein.ctrlcorredor_v5_DIP_SRP.LogicaNegocios.ConfiguracaoEstatis
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.bcopstein.ctrlcorredor_v5_DIP_SRP.LogicaNegocios.EstatisticasDTO;
 import com.bcopstein.ctrlcorredor_v5_DIP_SRP.LogicaNegocios.Evento;
 import com.bcopstein.ctrlcorredor_v5_DIP_SRP.LogicaNegocios.IEventoRepository;
@@ -12,8 +10,11 @@ import com.bcopstein.ctrlcorredor_v5_DIP_SRP.LogicaNegocios.PerformanceDTO;
 
 public class CalculoDesconsidera implements CalculoEstatistica {
 
-    @Autowired
     private IEventoRepository eventoRep;
+
+    public CalculoDesconsidera(IEventoRepository eventoRep){
+        this.eventoRep = eventoRep;
+    }
 
     @Override
     public EstatisticasDTO calculaEstatisticas(int distancia) {
@@ -24,10 +25,31 @@ public class CalculoDesconsidera implements CalculoEstatistica {
                 .filter(e->e.getDistancia() == distancia)
                 .collect(Collectors.toList());
             // Obtém um stream com os valores ordenados
+
+            //tira o menor e o maior
+            if(eventos.size() >= 3){
+                int maiorDistancia = Integer.MIN_VALUE;
+                int menorDistancia = Integer.MAX_VALUE;
+                int indexMaior = 0;
+                int indexMenor = 0;
+    
+                for(int i = 0; i < eventos.size(); i++){
+                    int dist = eventos.get(i).getDistancia();
+                    if(maiorDistancia < dist){
+                        maiorDistancia = dist;
+                        indexMaior = i;
+                    }
+                    if(menorDistancia > dist){
+                        menorDistancia = dist;
+                        indexMenor = i;
+                    }
+                }
+                eventos.remove(indexMenor);
+                eventos.remove(indexMaior);
+            }
+            
             List<Double> valores = eventos
                 .stream()
-                .filter(x -> x != eventos.get(0))               //retira o primeiro
-                .filter(x -> x != eventos.get(eventos.size()-1))      //retira o ultimo
                 .map(e-> e.getHoras()*60*60 + e.getMinutos()*60.0 + e.getSegundos())
                 .sorted()
                 .collect(Collectors.toList());
@@ -66,9 +88,31 @@ public class CalculoDesconsidera implements CalculoEstatistica {
                         .todos()
                         .stream()
                         .filter(e->e.getAno() == ano)
-                        .filter(x -> x != eventos.get(0))               //retira o primeiro
-                        .filter(x -> x != eventos.get(eventos.size()-1))      //retira o ultimo
                         .collect(Collectors.toList());
+
+        
+        if(eventos.size() >= 3){
+            int maiorDistancia = Integer.MIN_VALUE;
+            int menorDistancia = Integer.MAX_VALUE;
+            int indexMaior = 0;
+            int indexMenor = 0;
+
+            for(int i = 0; i < eventos.size(); i++){
+                int dist = eventos.get(i).getDistancia();
+                if(maiorDistancia < dist){
+                    maiorDistancia = dist;
+                    indexMaior = i;
+                }
+                if(menorDistancia > dist){
+                    menorDistancia = dist;
+                    indexMenor = i;
+                }
+            }
+            eventos.remove(indexMenor);
+            eventos.remove(indexMaior);
+        }
+        
+        
         int indiceMaiorDif = 0;
         double maiorDif = -1.0;
         for(int i=0;i<eventos.size()-1;i++){

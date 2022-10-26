@@ -3,7 +3,6 @@ package com.bcopstein.ctrlcorredor_v5_DIP_SRP.LogicaNegocios.ConfiguracaoEstatis
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.bcopstein.ctrlcorredor_v5_DIP_SRP.LogicaNegocios.EstatisticasDTO;
@@ -14,8 +13,11 @@ import com.bcopstein.ctrlcorredor_v5_DIP_SRP.LogicaNegocios.PerformanceDTO;
 @Component
 public class CalculoOriginal implements CalculoEstatistica{
 
-    @Autowired
     private IEventoRepository eventoRep;
+
+    public CalculoOriginal(IEventoRepository eventoRep){
+        this.eventoRep = eventoRep;
+    }
     
     @Override
     public EstatisticasDTO calculaEstatisticas(int distancia){
